@@ -1,9 +1,11 @@
 const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProd = nodeEnv === 'production';
+const isDev = !isProd;
 
 function createExternals() {
     // Some libraries, e.g. those with native addons, cannot be bundled
@@ -16,6 +18,7 @@ function createExternals() {
         'nrf-device-setup',
         'osx-temperature-sensor',
     ];
+
     return libs.reduce(
         (prev, lib) => Object.assign(prev, { [lib]: `commonjs ${lib}` }),
         {}
@@ -32,8 +35,17 @@ module.exports = {
     },
     output: {
         path: path.resolve('dist'),
-        publicPath: '../dist/',
+        publicPath: isDev
+            ? `http://localhost:${process.env.PORT || 5004}/`
+            : '../dist/',
         filename: '[name]-bundle.js',
+    },
+    devServer: {
+        hot: true,
+        contentBase: path.join(__dirname, '/dist/'),
+        inline: true,
+        stats: { colors: true },
+        port: process.env.PORT || 5004,
     },
     module: {
         rules: [
@@ -50,6 +62,9 @@ module.exports = {
                     },
                     {
                         loader: require.resolve('eslint-loader'),
+                        options: {
+                            emitWarning: true,
+                        },
                     },
                 ],
                 exclude: /node_modules\/(?!pc-nrfconnect-shared\/)/,
@@ -79,6 +94,8 @@ module.exports = {
         symlinks: false,
     },
     plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        isDev && new ReactRefreshWebpackPlugin(),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(nodeEnv),
         }),
@@ -90,7 +107,8 @@ module.exports = {
                 name === 'app' ? 'legacy.css' : '[name].css',
             chunkFilename: '[id].css',
         }),
-    ],
+    ].filter(Boolean),
+    watch: true,
     externals: createExternals(),
     target: 'electron-renderer',
 };
