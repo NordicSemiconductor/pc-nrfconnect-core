@@ -110,7 +110,10 @@
             "menuCategory": "Nordic Semiconductor",
             "include": "build/installer.nsh",
             "artifactName": "${name}-setup-${version}-${env.ARCH}.${ext}"
-        }
+        },
+        "externals": [
+            "nrf-device-lib-js"
+        ]
     },
     "devDependencies": {
         "asar": "3.0.3",
@@ -141,6 +144,7 @@
         "jquery": "3.5.1",
         "mousetrap": "1.6.5",
         "mustache": "4.0.1",
+        "nrf-device-lib-js": "^0.3.1",
         "nrf-device-setup": "0.6.7",
         "pc-ble-driver-js": "2.7.2",
         "popper.js": "1.16.1",

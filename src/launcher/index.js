@@ -51,6 +51,7 @@ import * as AppsActions from './actions/appsActions';
 import * as AutoUpdateActions from './actions/autoUpdateActions';
 import * as ProxyActions from './actions/proxyActions';
 import * as UsageDataActions from './actions/usageDataActions';
+
 import '../../resources/css/launcher.scss';
 
 const config = remote.require('../main/config');
