@@ -1,13 +1,25 @@
-## Unreleased
+## Version 3.7.0
 ### Updates
-- Warn when apps require a more recent of the shared code than is provided by
+- Warn when apps require a more recent version of the shared code than is provided by
   the launcher #519
 - Show app version in title bar (before only the version of the launcher was
   shown) #515
 - Links to product page added for PPK2 and updated for nRF5340 DK
+- Make use of the ErrorBoundary component added in [`pc-nrfconnect-shared`](https://github.com/NordicSemiconductor/pc-nrfconnect-shared)
+  in legacy apps
+- When the files of an app are corrupted (e.g. by a partial sync of a file sync tool)
+  the launcher used to be blocked. Now the launcher is not blocked anymore and offers
+  an additional recovery mechanism.
+
 ### Bugfixes
 - macOS: When clicking on URLs in log entries the web site was not opened
 - Fixed issue where undefined serialport attribute causes crash #521
+- The error message from #403 for an apps.json that is not found for a
+  source on the server did not show up correctly. #531
+
+## Version 3.6.2
+### Updates
+- Prevented crash when incomplete regular expression is entered in search box
 
 ## Version 3.6.1
 ### Updates

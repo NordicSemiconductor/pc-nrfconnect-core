@@ -1,4 +1,4 @@
-/* Copyright (c) 2015 - 2017, Nordic Semiconductor ASA
+/* Copyright (c) 2015 - 2021, Nordic Semiconductor ASA
  *
  * All rights reserved.
  *
@@ -35,51 +35,44 @@
  */
 
 import React from 'react';
-import Mousetrap from 'mousetrap';
-import { bool, func, string } from 'prop-types';
+import { useDispatch } from 'react-redux';
+import { remote } from 'electron';
+import { ErrorBoundary } from 'pc-nrfconnect-shared';
+import { node } from 'prop-types';
 
-function getClassName(baseClass, isSelected) {
-    return `${baseClass} ${isSelected ? 'active' : ''}`;
-}
+import pkgJson from '../../../package.json';
+import * as AppsActions from '../actions/appsActions';
+import { sendLauncherUsageData } from '../actions/usageDataActions';
 
-export default class NavMenuItem extends React.Component {
-    componentDidMount() {
-        const { hotkey, onClick } = this.props;
-        Mousetrap.bind(hotkey, onClick);
-    }
+const ErrorBoundaryLauncher = ({ children }) => {
+    const dispatch = useDispatch();
 
-    componentWillUnmount() {
-        const { hotkey } = this.props;
-        Mousetrap.unbind(hotkey);
-    }
+    const restoreDefaults = () => {
+        dispatch(AppsActions.setAppManagementFilter(''));
+        dispatch(AppsActions.setAppManagementShow({}));
+        dispatch(AppsActions.setAppManagementSource({}));
+        remote.getCurrentWindow().reload();
+    };
 
-    render() {
-        const { title, text, cssClass, iconClass, isSelected, onClick } =
-            this.props;
-        return (
-            <button
-                title={title}
-                className={getClassName(cssClass, isSelected)}
-                onClick={onClick}
-                type="button"
-            >
-                <span className={iconClass} />
-                <span>{text}</span>
-            </button>
-        );
-    }
-}
+    const sendUsageData = error => {
+        const launcherInfo = pkgJson.version ? `v${pkgJson.version}` : '';
+        const errorLabel = `${process.platform}; ${process.arch}; v${launcherInfo}; ${error}`;
+        dispatch(sendLauncherUsageData('Report error', errorLabel));
+    };
 
-NavMenuItem.propTypes = {
-    isSelected: bool.isRequired,
-    text: string.isRequired,
-    title: string.isRequired,
-    iconClass: string.isRequired,
-    onClick: func.isRequired,
-    cssClass: string,
-    hotkey: string.isRequired,
+    return (
+        <ErrorBoundary
+            appName="Launcher"
+            restoreDefaults={restoreDefaults}
+            sendUsageData={sendUsageData}
+        >
+            {children}
+        </ErrorBoundary>
+    );
 };
 
-NavMenuItem.defaultProps = {
-    cssClass: 'btn btn-primary core-btn core-padded-row',
+ErrorBoundaryLauncher.propTypes = {
+    children: node,
 };
+
+export default ErrorBoundaryLauncher;
